@@ -33,7 +33,8 @@ public class ModMethodVisitor extends MethodVisitor {
     private String methodName;
     private String methodDescriptor;
 
-    public ModMethodVisitor(String name, String desc, final LinkedList<ModAnnotation> annotations) {
+    public ModMethodVisitor(String name, String desc, final LinkedList<ModAnnotation> annotations)
+    {
         super(Opcodes.ASM5);
         this.methodName = name;
         this.methodDescriptor = desc;
@@ -41,8 +42,9 @@ public class ModMethodVisitor extends MethodVisitor {
     }
 
     @Override
-    public AnnotationVisitor visitAnnotation(String annotationName, boolean runtimeVisible) {
-        ModAnnotation ann = new ModAnnotation(ElementType.METHOD, Type.getType(annotationName), methodName + methodDescriptor);
+    public AnnotationVisitor visitAnnotation(String annotationName, boolean runtimeVisible)
+    {
+        ModAnnotation ann = new ModAnnotation(ElementType.METHOD, Type.getType(annotationName), methodName+methodDescriptor);
         annotations.addFirst(ann);
         return new ModAnnotationVisitor(annotations, ann);
     }

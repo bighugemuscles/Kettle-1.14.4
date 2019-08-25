@@ -20,11 +20,11 @@
 package net.minecraftforge.fml.loading.moddiscovery;
 
 import com.google.common.collect.ImmutableMap;
-import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.forgespi.language.IModFileInfo;
 import net.minecraftforge.forgespi.language.IModInfo;
-import net.minecraftforge.forgespi.language.IModLanguageProvider;
 import net.minecraftforge.forgespi.language.ModFileScanData;
+import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.forgespi.language.IModLanguageProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -44,7 +44,8 @@ import java.util.jar.Manifest;
 import static net.minecraftforge.fml.loading.LogMarkers.LOADING;
 import static net.minecraftforge.fml.loading.LogMarkers.SCAN;
 
-public class ModFile {
+public class ModFile
+{
     private static final Manifest DEFAULTMANIFEST;
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -58,15 +59,18 @@ public class ModFile {
     private IModLanguageProvider loader;
     private Throwable scanError;
 
-    public void setFileProperties(Map<String, Object> fileProperties) {
+    public void setFileProperties(Map<String, Object> fileProperties)
+    {
         this.fileProperties = fileProperties;
     }
 
-    public IModLanguageProvider getLoader() {
+    public IModLanguageProvider getLoader()
+    {
         return loader;
     }
 
-    public Path findResource(String className) {
+    public Path findResource(String className)
+    {
         return locator.findPath(this, className);
     }
 
@@ -77,7 +81,6 @@ public class ModFile {
     public enum Type {
         MOD, LIBRARY, LANGPROVIDER
     }
-
     private final Path filePath;
     private final Type modFileType;
     private final Manifest manifest;
@@ -94,17 +97,16 @@ public class ModFile {
         this.locator = locator;
         this.filePath = file;
         manifest = locator.findManifest(file).orElse(DEFAULTMANIFEST);
-        if (manifest != DEFAULTMANIFEST) LOGGER.debug(SCAN, "Mod file {} has a manifest", file);
-        else LOGGER.debug(SCAN, "Mod file {} is missing a manifest", file);
+        if (manifest != DEFAULTMANIFEST) LOGGER.debug(SCAN,"Mod file {} has a manifest", file);
+        else LOGGER.debug(SCAN,"Mod file {} is missing a manifest", file);
         final Optional<String> value = Optional.ofNullable(manifest.getMainAttributes().getValue(TYPE));
         modFileType = Type.valueOf(value.orElse("MOD"));
         jarVersion = Optional.ofNullable(manifest.getMainAttributes().getValue(Attributes.Name.IMPLEMENTATION_VERSION)).orElse("NONE");
     }
 
-    public Supplier<Map<String, Object>> getSubstitutionMap() {
-        return () -> ImmutableMap.<String, Object>builder().put("jarVersion", jarVersion).putAll(fileProperties).build();
+    public Supplier<Map<String,Object>> getSubstitutionMap() {
+        return () -> ImmutableMap.<String,Object>builder().put("jarVersion", jarVersion).putAll(fileProperties).build();
     }
-
     public Type getType() {
         return modFileType;
     }
@@ -120,13 +122,12 @@ public class ModFile {
     public Optional<Path> getAccessTransformer() {
         return Optional.ofNullable(Files.exists(accessTransformer) ? accessTransformer : null);
     }
-
     public boolean identifyMods() {
         this.modFileInfo = ModFileParser.readModList(this);
         if (this.modFileInfo == null) return false;
-        LOGGER.debug(LOADING, "Loading mod file {} with language {}", this.getFilePath(), this.modFileInfo.getModLoader());
+        LOGGER.debug(LOADING,"Loading mod file {} with language {}", this.getFilePath(), this.modFileInfo.getModLoader());
         this.coreMods = ModFileParser.getCoreMods(this);
-        this.coreMods.forEach(mi -> LOGGER.debug(LOADING, "Found coremod {}", mi.getPath()));
+        this.coreMods.forEach(mi-> LOGGER.debug(LOADING,"Found coremod {}", mi.getPath()));
         this.accessTransformer = locator.findPath(this, "META-INF", "accesstransformer.cfg");
         return true;
     }
@@ -146,8 +147,8 @@ public class ModFile {
     public void scanFile(Consumer<Path> pathConsumer) {
         locator.scanFile(this, pathConsumer);
     }
-
-    public void setFutureScanResult(CompletableFuture<ModFileScanData> future) {
+    public void setFutureScanResult(CompletableFuture<ModFileScanData> future)
+    {
         this.futureScanResult = future;
     }
 
@@ -175,7 +176,7 @@ public class ModFile {
 
     @Override
     public String toString() {
-        return "Mod File: " + this.filePath;
+        return "Mod File: " + Objects.toString(this.filePath);
     }
 
     public String getFileName() {

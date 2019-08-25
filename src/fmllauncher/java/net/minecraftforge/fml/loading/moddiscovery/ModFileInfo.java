@@ -20,10 +20,10 @@
 package net.minecraftforge.fml.loading.moddiscovery;
 
 import com.electronwill.nightconfig.core.UnmodifiableConfig;
-import net.minecraftforge.fml.loading.StringUtils;
+import net.minecraftforge.forgespi.language.MavenVersionAdapter;
 import net.minecraftforge.forgespi.language.IModFileInfo;
 import net.minecraftforge.forgespi.language.IModInfo;
-import net.minecraftforge.forgespi.language.MavenVersionAdapter;
+import net.minecraftforge.fml.loading.StringUtils;
 import org.apache.maven.artifact.versioning.VersionRange;
 
 import java.net.URL;
@@ -31,7 +31,8 @@ import java.util.*;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 
-public class ModFileInfo implements IModFileInfo {
+public class ModFileInfo implements IModFileInfo
+{
     private final UnmodifiableConfig config;
     private final ModFile modFile;
     private final URL issueURL;
@@ -39,16 +40,17 @@ public class ModFileInfo implements IModFileInfo {
     private final VersionRange modLoaderVersion;
     private final boolean showAsResourcePack;
     private final List<IModInfo> mods;
-    private final Map<String, Object> properties;
+    private final Map<String,Object> properties;
 
-    ModFileInfo(final ModFile modFile, final UnmodifiableConfig config) {
+    ModFileInfo(final ModFile modFile, final UnmodifiableConfig config)
+    {
         this.modFile = modFile;
         this.config = config;
         this.modLoader = config.<String>getOptional("modLoader").
-                orElseThrow(() -> new InvalidModFileException("Missing ModLoader in file", this));
+                orElseThrow(()->new InvalidModFileException("Missing ModLoader in file", this));
         this.modLoaderVersion = config.<String>getOptional("loaderVersion").
                 map(MavenVersionAdapter::createFromVersionSpec).
-                orElseThrow(() -> new InvalidModFileException("Missing ModLoader version in file", this));
+                orElseThrow(()->new InvalidModFileException("Missing ModLoader version in file", this));
         this.showAsResourcePack = config.<Boolean>getOrElse("showAsResourcePack", false);
         this.properties = config.<UnmodifiableConfig>getOptional("properties").
                 map(UnmodifiableConfig::valueMap).orElse(Collections.emptyMap());
@@ -60,31 +62,36 @@ public class ModFileInfo implements IModFileInfo {
         if (modConfigs.isEmpty()) {
             throw new InvalidModFileException("Missing mods list", this);
         }
-        this.mods = modConfigs.stream().map(mi -> new ModInfo(this, mi)).collect(Collectors.toList());
+        this.mods = modConfigs.stream().map(mi-> new ModInfo(this, mi)).collect(Collectors.toList());
         this.issueURL = config.<String>getOptional("issueTrackerURL").map(StringUtils::toURL).orElse(null);
     }
 
     @Override
-    public List<IModInfo> getMods() {
+    public List<IModInfo> getMods()
+    {
         return mods;
     }
 
-    public ModFile getFile() {
+    public ModFile getFile()
+    {
         return this.modFile;
     }
 
     @Override
-    public UnmodifiableConfig getConfig() {
+    public UnmodifiableConfig getConfig()
+    {
         return this.config;
     }
 
     @Override
-    public String getModLoader() {
+    public String getModLoader()
+    {
         return modLoader;
     }
 
     @Override
-    public VersionRange getModLoaderVersion() {
+    public VersionRange getModLoaderVersion()
+    {
         return modLoaderVersion;
     }
 

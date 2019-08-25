@@ -28,10 +28,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.net.URL;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
+import java.util.*;
 import static net.minecraftforge.fml.loading.LogMarkers.CORE;
 
 public abstract class FMLUserdevLaunchProvider extends FMLCommonLaunchHandler {
@@ -51,7 +48,7 @@ public abstract class FMLUserdevLaunchProvider extends FMLCommonLaunchHandler {
         return forgeJar;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void setup(final IEnvironment environment, final Map<String, ?> arguments) {
         if (!forgeJar.getFileName().toString().endsWith(".jar")) {
@@ -74,7 +71,7 @@ public abstract class FMLUserdevLaunchProvider extends FMLCommonLaunchHandler {
         processModClassesEnvironmentVariable((Map<String, List<Pair<Path, List<Path>>>>) arguments);
 
         // generics are gross yea?
-        ((Map) arguments).put("mavenRoots", mavenRoots);
+        ((Map)arguments).put("mavenRoots", mavenRoots);
     }
 
     @Override
@@ -89,8 +86,8 @@ public abstract class FMLUserdevLaunchProvider extends FMLCommonLaunchHandler {
             LOGGER.fatal(CORE, "Unable to locate minecraft data on the classpath");
             throw new RuntimeException("Unable to locate minecraft data on the classpath");
         }
-        mcJars = LibraryFinder.findJarPathFor("en_us.json", "mcdata", mcDataPath);
-        return new Path[]{mcJars};
+        mcJars = LibraryFinder.findJarPathFor("en_us.json","mcdata", mcDataPath);
+        return new Path[] {mcJars};
     }
 
     @Override

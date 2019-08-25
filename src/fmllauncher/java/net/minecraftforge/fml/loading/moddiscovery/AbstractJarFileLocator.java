@@ -51,7 +51,7 @@ public abstract class AbstractJarFileLocator implements IModLocator {
         try {
             return FileSystems.newFileSystem(modFile.getFilePath(), modFile.getClass().getClassLoader());
         } catch (ZipError | IOException e) {
-            LOGGER.debug(SCAN, "Invalid JAR file {} - no filesystem created", modFile.getFilePath());
+            LOGGER.debug(SCAN,"Invalid JAR file {} - no filesystem created", modFile.getFilePath());
             return null;
         }
     }
@@ -64,7 +64,7 @@ public abstract class AbstractJarFileLocator implements IModLocator {
     }
 
     public void scanFile(final ModFile file, final Consumer<Path> pathConsumer) {
-        LOGGER.debug(SCAN, "Scan started: {}", file);
+        LOGGER.debug(SCAN,"Scan started: {}", file);
         FileSystem fs = modJars.get(file);
         fs.getRootDirectories().forEach(path -> {
             try (Stream<Path> files = Files.find(path, Integer.MAX_VALUE, (p, a) -> p.getNameCount() > 0 && p.getFileName().toString().endsWith(".class"))) {
@@ -73,13 +73,17 @@ public abstract class AbstractJarFileLocator implements IModLocator {
                 e.printStackTrace();
             }
         });
-        LOGGER.debug(SCAN, "Scan finished: {}", file);
+        LOGGER.debug(SCAN,"Scan finished: {}", file);
     }
 
-    public Optional<Manifest> findManifest(final Path file) {
-        try (JarFile jf = new JarFile(file.toFile())) {
+    public Optional<Manifest> findManifest(final Path file)
+    {
+        try (JarFile jf = new JarFile(file.toFile()))
+        {
             return Optional.ofNullable(jf.getManifest());
-        } catch (IOException e) {
+        }
+        catch (IOException e)
+        {
             return Optional.empty();
         }
     }

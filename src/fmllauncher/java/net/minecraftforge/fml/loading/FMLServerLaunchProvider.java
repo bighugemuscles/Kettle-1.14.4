@@ -31,24 +31,28 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-public class FMLServerLaunchProvider extends FMLCommonLaunchHandler implements ILaunchHandlerService {
+public class FMLServerLaunchProvider extends FMLCommonLaunchHandler implements ILaunchHandlerService
+{
     private static final Logger LOGGER = LogManager.getLogger();
 
     @Override
-    public String name() {
+    public String name()
+    {
         return "fmlserver";
     }
 
     @Override
-    public Callable<Void> launchService(String[] arguments, ITransformingClassLoader launchClassLoader) {
+    public Callable<Void> launchService(String[] arguments, ITransformingClassLoader launchClassLoader)
+    {
         return () -> {
             super.beforeStart(launchClassLoader);
             launchClassLoader.addTargetPackageFilter(getPackagePredicate());
-            Class.forName("net.minecraft.server.MinecraftServer", true, launchClassLoader.getInstance()).getMethod("main", String[].class).invoke(null, (Object) arguments);
+            Class.forName("net.minecraft.server.MinecraftServer", true, launchClassLoader.getInstance()).getMethod("main", String[].class).invoke(null, (Object)arguments);
             return null;
         };
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void setup(final IEnvironment environment, final Map<String, ?> arguments) {
         final List<String> mavenRoots = new ArrayList<>((List<String>) arguments.get("mavenRoots"));
@@ -57,14 +61,15 @@ public class FMLServerLaunchProvider extends FMLCommonLaunchHandler implements I
         final String forgeVersion = (String) arguments.get("forgeVersion");
         final String mcVersion = (String) arguments.get("mcVersion");
         final String forgeGroup = (String) arguments.get("forgeGroup");
-        mods.add(forgeGroup + ":forge:universal:" + mcVersion + "-" + forgeVersion);
+        mods.add(forgeGroup+":forge:universal:"+mcVersion+"-"+forgeVersion);
         // generics are gross yea?
-        ((Map) arguments).put("mavenRoots", mavenRoots);
-        ((Map) arguments).put("mods", mods);
+        ((Map)arguments).put("mavenRoots", mavenRoots);
+        ((Map)arguments).put("mods", mods);
     }
 
     @Override
-    public Dist getDist() {
+    public Dist getDist()
+    {
         return Dist.DEDICATED_SERVER;
     }
 

@@ -22,8 +22,18 @@ package net.minecraftforge.fml.loading.toposort;
 import com.google.common.base.Preconditions;
 import com.google.common.graph.Graph;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.Set;
+
 import javax.annotation.Nullable;
-import java.util.*;
 
 /**
  * Provides a topological sort algorithm.
@@ -102,6 +112,7 @@ public final class TopologicalSort {
         return results;
     }
 
+    @SuppressWarnings("unchecked") // for unchecked annotation
     private static <T> void throwCyclePresentException(Set<Set<T>> components) {
         throw new CyclePresentException((Set<Set<?>>) (Set<?>) components);
     }

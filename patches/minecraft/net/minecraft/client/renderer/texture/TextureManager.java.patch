@@ -1,0 +1,10 @@
+--- a/net/minecraft/client/renderer/texture/TextureManager.java
++++ b/net/minecraft/client/renderer/texture/TextureManager.java
+@@ -125,6 +125,7 @@
+    public void func_147645_c(ResourceLocation p_147645_1_) {
+       ITextureObject itextureobject = this.func_110581_b(p_147645_1_);
+       if (itextureobject != null) {
++         this.field_110585_a.remove(p_147645_1_); // Forge: fix MC-98707
+          TextureUtil.releaseTextureId(itextureobject.func_110552_b());
+       }
+ 

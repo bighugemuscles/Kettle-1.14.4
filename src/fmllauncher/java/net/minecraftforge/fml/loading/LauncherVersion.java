@@ -35,7 +35,8 @@ public class LauncherVersion {
         LOGGER.debug(CORE, "Found FMLLauncher version {}", launcherVersion);
     }
 
-    public static String getVersion() {
+    public static String getVersion()
+    {
         return launcherVersion;
     }
 }

@@ -21,7 +21,11 @@ package net.minecraftforge.fml.loading.toposort;
 
 import com.google.common.graph.Graph;
 
-import java.util.*;
+import java.util.BitSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * An object that splits a graph into strongly connected components lazily with
@@ -55,6 +59,7 @@ public class StronglyConnectedComponentDetector<T> {
         return components;
     }
 
+    @SuppressWarnings("unchecked")
     private void calculate() {
         components = new HashSet<>();
         int t = 0;

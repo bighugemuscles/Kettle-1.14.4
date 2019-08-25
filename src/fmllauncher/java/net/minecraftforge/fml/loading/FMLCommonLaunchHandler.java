@@ -42,7 +42,8 @@ import java.util.stream.Stream;
 
 import static net.minecraftforge.fml.loading.LogMarkers.CORE;
 
-public abstract class FMLCommonLaunchHandler {
+public abstract class FMLCommonLaunchHandler
+{
     private static final Logger LOGGER = LogManager.getLogger();
     private static final List<String> SKIPPACKAGES = Arrays.asList(
             // standard libs
@@ -73,12 +74,15 @@ public abstract class FMLCommonLaunchHandler {
         builder.setManifestLocator(getClassLoaderManifestLocatorFunction());
     }
 
-    public void setup(final IEnvironment environment, final Map<String, ?> arguments) {
+    public void setup(final IEnvironment environment, final Map<String, ?> arguments)
+    {
+
     }
 
     public abstract Dist getDist();
 
-    protected void beforeStart(ITransformingClassLoader launchClassLoader) {
+    protected void beforeStart(ITransformingClassLoader launchClassLoader)
+    {
         FMLLoader.beforeStart(launchClassLoader);
     }
 
@@ -94,7 +98,7 @@ public abstract class FMLCommonLaunchHandler {
         LOGGER.debug(CORE, "Found supplied mod coordinates [{}]", modClassPaths);
 
         final List<Pair<Path, List<Path>>> explodedTargets = arguments.computeIfAbsent("explodedTargets", a -> new ArrayList<>());
-        modClassPaths.forEach((modlabel, paths) -> explodedTargets.add(Pair.of(paths.get(0), paths.subList(1, paths.size()))));
+        modClassPaths.forEach((modlabel,paths) -> explodedTargets.add(Pair.of(paths.get(0), paths.subList(1, paths.size()))));
     }
 
     private Pair<String, Path> buildModPair(String[] splitString) {
@@ -109,17 +113,18 @@ public abstract class FMLCommonLaunchHandler {
             throw new RuntimeException("Missing forge!");
         }
 
-        Stream.of(mcPaths).forEach(p -> {
+        Stream.of(mcPaths).forEach(p->{
             if (!Files.exists(p)) {
-                LOGGER.fatal(CORE, "Failed to find Minecraft resource version {} at {}", mcVersion + "-" + mcpVersion, p);
+                LOGGER.fatal(CORE, "Failed to find Minecraft resource version {} at {}", mcVersion+"-"+mcpVersion, p);
                 throw new RuntimeException("Missing minecraft resource!");
             }
         });
 
     }
 
+
     protected Function<String, Optional<URL>> getClassLoaderLocatorFunction() {
-        return input -> Optional.ofNullable(FMLLoader.getLoadingModList().findURLForResource(input));
+        return input->Optional.ofNullable(FMLLoader.getLoadingModList().findURLForResource(input));
     }
 
     protected Function<URLConnection, Optional<Manifest>> getClassLoaderManifestLocatorFunction() {

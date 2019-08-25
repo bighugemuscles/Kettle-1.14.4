@@ -44,6 +44,7 @@ public class TopologicalSortTests {
 
     @Test
     @DisplayName("strongly connected components")
+    @SuppressWarnings("unchecked")
     void testScc() {
         MutableGraph<Integer> graph = GraphBuilder.directed().build();
         graph.putEdge(2, 4);
@@ -59,6 +60,7 @@ public class TopologicalSortTests {
 
     @Test
     @DisplayName("strongly connected components 2")
+    @SuppressWarnings("unchecked")
     void testScc2() {
         MutableGraph<Integer> graph = GraphBuilder.directed().build();
         graph.putEdge(2, 4);

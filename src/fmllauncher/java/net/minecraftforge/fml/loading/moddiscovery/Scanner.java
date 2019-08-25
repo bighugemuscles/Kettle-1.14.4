@@ -51,8 +51,8 @@ public class Scanner {
     }
 
     private void fileVisitor(final Path path, final ModFileScanData result) {
-        LOGGER.debug(SCAN, "Scanning {} path {}", fileToScan, path);
-        try (InputStream in = Files.newInputStream(path)) {
+        LOGGER.debug(SCAN,"Scanning {} path {}", fileToScan, path);
+        try (InputStream in = Files.newInputStream(path)){
             ModClassVisitor mcv = new ModClassVisitor();
             ClassReader cr = new ClassReader(in);
             cr.accept(mcv, 0);

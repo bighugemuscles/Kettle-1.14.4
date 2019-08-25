@@ -19,23 +19,29 @@
 
 package net.minecraftforge.fml.loading;
 
+import com.google.common.collect.Streams;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.MutableGraph;
+import net.minecraftforge.forgespi.language.IModFileInfo;
+import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.fml.loading.EarlyLoadingException.ExceptionData;
 import net.minecraftforge.fml.loading.moddiscovery.ModFile;
 import net.minecraftforge.fml.loading.moddiscovery.ModFileInfo;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.minecraftforge.fml.loading.toposort.CyclePresentException;
 import net.minecraftforge.fml.loading.toposort.TopologicalSort;
-import net.minecraftforge.forgespi.language.IModFileInfo;
-import net.minecraftforge.forgespi.language.IModInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.util.StringBuilderFormattable;
 import org.apache.maven.artifact.versioning.ArtifactVersion;
 import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -43,17 +49,20 @@ import java.util.stream.Stream;
 
 import static net.minecraftforge.fml.loading.LogMarkers.LOADING;
 
-public class ModSorter {
+public class ModSorter
+{
     private static final Logger LOGGER = LogManager.getLogger();
     private List<ModFile> modFiles;
     private List<ModInfo> sortedList;
     private Map<String, ModInfo> modIdNameLookup;
 
-    private ModSorter(final List<ModFile> modFiles) {
+    private ModSorter(final List<ModFile> modFiles)
+    {
         this.modFiles = modFiles;
     }
 
-    public static LoadingModList sort(List<ModFile> mods) {
+    public static LoadingModList sort(List<ModFile> mods)
+    {
         final ModSorter ms = new ModSorter(mods);
         EarlyLoadingException earlyLoadingException = null;
         try {
@@ -72,19 +81,24 @@ public class ModSorter {
         modFiles.forEach(ModFile::identifyLanguage);
     }
 
-    private void sort() {
+    @SuppressWarnings("UnstableApiUsage")
+    private void sort()
+    {
         // lambdas are identity based, so sorting them is impossible unless you hold reference to them
         final MutableGraph<ModFileInfo> graph = GraphBuilder.directed().build();
         AtomicInteger counter = new AtomicInteger();
         Map<IModFileInfo, Integer> infos = modFiles.stream().map(ModFile::getModFileInfo).collect(Collectors.toMap(Function.identity(), (e) -> counter.incrementAndGet()));
         infos.keySet().forEach(i -> graph.addNode((ModFileInfo) i));
-        modFiles.stream().map(ModFile::getModInfos).flatMap(Collection::stream)
-                .map(IModInfo::getDependencies).flatMap(Collection::stream)
-                .forEach(dep -> addDependency(graph, dep));
+        modFiles.stream().map(ModFile::getModInfos).flatMap(Collection::stream).
+                map(IModInfo::getDependencies).flatMap(Collection::stream).
+                forEach(dep -> addDependency(graph, dep));
         final List<ModFileInfo> sorted;
-        try {
+        try
+        {
             sorted = TopologicalSort.topologicalSort(graph, Comparator.comparing(infos::get));
-        } catch (CyclePresentException e) {
+        }
+        catch (CyclePresentException e)
+        {
             Set<Set<ModFileInfo>> cycles = e.getCycles();
             LOGGER.error(LOADING, () -> ((StringBuilderFormattable) (buffer -> {
                 buffer.append("Mod Sorting failed.\n");
@@ -106,8 +120,10 @@ public class ModSorter {
         this.modFiles = sorted.stream().map(ModFileInfo::getFile).collect(Collectors.toList());
     }
 
-    private void addDependency(MutableGraph<ModFileInfo> topoGraph, IModInfo.ModVersion dep) {
-        final ModFileInfo self = (ModFileInfo) dep.getOwner().getOwningFile();
+    @SuppressWarnings("UnstableApiUsage")
+    private void addDependency(MutableGraph<ModFileInfo> topoGraph, IModInfo.ModVersion dep)
+    {
+        final ModFileInfo self = (ModFileInfo)dep.getOwner().getOwningFile();
         final ModInfo targetModInfo = modIdNameLookup.get(dep.getModId());
         // soft dep that doesn't exist. Just return. No edge required.
         if (targetModInfo == null) return;
@@ -126,7 +142,8 @@ public class ModSorter {
         }
     }
 
-    private void buildUniqueList() {
+    private void buildUniqueList()
+    {
         final Stream<ModInfo> modInfos = modFiles.stream().map(ModFile::getModInfos).flatMap(Collection::stream).map(ModInfo.class::cast);
         final Map<String, List<ModInfo>> modIds = modInfos.collect(Collectors.groupingBy(IModInfo::getModId));
 
@@ -137,13 +154,14 @@ public class ModSorter {
             final List<EarlyLoadingException.ExceptionData> duplicateModErrors = dupedMods.stream().
                     map(dm -> new EarlyLoadingException.ExceptionData("fml.modloading.dupedmod", dm.getValue().get(0))).
                     collect(Collectors.toList());
-            throw new EarlyLoadingException("Duplicate mods found", null, duplicateModErrors);
+            throw new EarlyLoadingException("Duplicate mods found", null,  duplicateModErrors);
         }
 
         modIdNameLookup = modIds.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0)));
     }
 
-    private void verifyDependencyVersions() {
+    private void verifyDependencyVersions()
+    {
         final Map<String, ArtifactVersion> modVersions = modFiles.stream().map(ModFile::getModInfos).
                 flatMap(Collection::stream).collect(Collectors.toMap(IModInfo::getModId, IModInfo::getVersion));
         final Map<IModInfo, List<IModInfo.ModVersion>> modVersionDependencies = modFiles.stream().
@@ -152,7 +170,7 @@ public class ModSorter {
         final Set<IModInfo.ModVersion> mandatoryModVersions = modVersionDependencies.values().stream().flatMap(Collection::stream).
                 filter(mv -> mv.isMandatory() && mv.getSide().isCorrectSide()).collect(Collectors.toSet());
         LOGGER.debug(LOADING, "Found {} mandatory requirements", mandatoryModVersions.size());
-        final Set<IModInfo.ModVersion> missingVersions = mandatoryModVersions.stream().filter(mv -> this.modVersionMatches(mv, modVersions)).collect(Collectors.toSet());
+        final Set<IModInfo.ModVersion> missingVersions = mandatoryModVersions.stream().filter(mv->this.modVersionMatches(mv, modVersions)).collect(Collectors.toSet());
         LOGGER.debug(LOADING, "Found {} mandatory mod requirements missing", missingVersions.size());
 
         if (!missingVersions.isEmpty()) {
@@ -164,7 +182,8 @@ public class ModSorter {
         }
     }
 
-    private boolean modVersionMatches(final IModInfo.ModVersion mv, final Map<String, ArtifactVersion> modVersions) {
+    private boolean modVersionMatches(final IModInfo.ModVersion mv, final Map<String, ArtifactVersion> modVersions)
+    {
         return !modVersions.containsKey(mv.getModId()) || !mv.getVersionRange().containsVersion(modVersions.get(mv.getModId()));
     }
 }

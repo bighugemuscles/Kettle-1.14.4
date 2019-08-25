@@ -25,26 +25,26 @@ import cpw.mods.modlauncher.api.ITransformingClassLoader;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLCommonLaunchHandler;
 import net.minecraftforge.fml.loading.LibraryFinder;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Callable;
 
 import static net.minecraftforge.fml.loading.LogMarkers.CORE;
 
-public class FMLDevServerLaunchProvider extends FMLCommonLaunchHandler implements ILaunchHandlerService {
+public class FMLDevServerLaunchProvider extends FMLCommonLaunchHandler implements ILaunchHandlerService
+{
     private static final Logger LOGGER = LogManager.getLogger();
     private Path compiledClasses;
     private Path resources;
 
     @Override
-    public String name() {
+    public String name()
+    {
         return "fmldevserver";
     }
 
@@ -59,34 +59,37 @@ public class FMLDevServerLaunchProvider extends FMLCommonLaunchHandler implement
     @Override
     public Path[] getMCPaths(final String mcVersion, final String mcpVersion, final String forgeVersion, final String forgeGroup) {
         // In forge dev, we just find the path for ForgeVersion for everything
-        return new Path[]{compiledClasses, resources};
+        return new Path[] { compiledClasses, resources };
     }
 
     @Override
-    public Callable<Void> launchService(String[] arguments, ITransformingClassLoader launchClassLoader) {
+    public Callable<Void> launchService(String[] arguments, ITransformingClassLoader launchClassLoader)
+    {
         return () -> {
             LOGGER.debug(CORE, "Launching minecraft in {} with arguments {}", launchClassLoader, arguments);
             super.beforeStart(launchClassLoader);
             launchClassLoader.addTargetPackageFilter(getPackagePredicate());
             Thread.currentThread().setContextClassLoader(launchClassLoader.getInstance());
-            Class.forName("net.minecraft.server.MinecraftServer", true, launchClassLoader.getInstance()).getMethod("main", String[].class).invoke(null, (Object) arguments);
+            Class.forName("net.minecraft.server.MinecraftServer", true, launchClassLoader.getInstance()).getMethod("main", String[].class).invoke(null, (Object)arguments);
             return null;
         };
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public void setup(IEnvironment environment, final Map<String, ?> arguments) {
+    public void setup(IEnvironment environment, final Map<String, ?> arguments)
+    {
         // we're injecting forge into the exploded dir finder
         final Path forgemodstoml = LibraryFinder.findJarPathFor("META-INF/mods.toml", "forgemodstoml");
-        ((Map<String, List<Pair<Path, List<Path>>>>) arguments).computeIfAbsent("explodedTargets", a -> new ArrayList<>()).
+        ((Map<String, List<Pair<Path,List<Path>>>>) arguments).computeIfAbsent("explodedTargets", a->new ArrayList<>()).
                 add(Pair.of(forgemodstoml, Collections.singletonList(compiledClasses)));
 
         processModClassesEnvironmentVariable((Map<String, List<Pair<Path, List<Path>>>>) arguments);
     }
 
     @Override
-    public Dist getDist() {
+    public Dist getDist()
+    {
         return Dist.DEDICATED_SERVER;
     }
 

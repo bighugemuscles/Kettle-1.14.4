@@ -67,7 +67,6 @@ public class ServerMain {
             }
         }
     }
-
     private static Manifest urlToManifest(URL url) {
         try {
             return new JarFile(new File(url.toURI())).getManifest();

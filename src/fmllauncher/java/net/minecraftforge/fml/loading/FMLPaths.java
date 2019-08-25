@@ -29,7 +29,8 @@ import java.util.Arrays;
 
 import static net.minecraftforge.fml.loading.LogMarkers.CORE;
 
-public enum FMLPaths {
+public enum FMLPaths
+{
     GAMEDIR(),
     MODSDIR("mods"),
     CONFIGDIR("config"),
@@ -54,7 +55,8 @@ public enum FMLPaths {
         this.isDirectory = isDir;
     }
 
-    private Path computePath(String... path) {
+    private Path computePath(String... path)
+    {
         return Paths.get(path[0], Arrays.copyOfRange(path, 1, path.length));
     }
 
@@ -64,13 +66,16 @@ public enum FMLPaths {
         loadAbsolutePaths(rootPath);
     }
 
-    public static void loadAbsolutePaths(Path rootPath) {
-        for (FMLPaths path : FMLPaths.values()) {
+    public static void loadAbsolutePaths(Path rootPath)
+    {
+        for (FMLPaths path : FMLPaths.values())
+        {
             path.absolutePath = rootPath.resolve(path.relativePath).toAbsolutePath().normalize();
-            if (path.isDirectory) {
+            if (path.isDirectory)
+            {
                 FileUtils.getOrCreateDirectory(path.absolutePath, path.name());
             }
-            LOGGER.debug(CORE, "Path {} is {}", () -> path, () -> path.absolutePath);
+            LOGGER.debug(CORE,"Path {} is {}", ()-> path, ()-> path.absolutePath);
         }
     }
 

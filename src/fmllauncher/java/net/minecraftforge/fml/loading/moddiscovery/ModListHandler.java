@@ -39,12 +39,11 @@ import static net.minecraftforge.fml.loading.LogMarkers.CORE;
 
 public class ModListHandler {
     private static final Logger LOGGER = LogManager.getLogger();
-
     /**
      * Reads the modList paths specified, and searches each maven root for mods matching. Returns a list of mods
      * found.
      *
-     * @param modListPaths   Paths to search for mod file lists
+     * @param modListPaths Paths to search for mod file lists
      * @param mavenRootPaths Roots to look for mods listed
      * @return list of found mod coordinates
      */
@@ -53,16 +52,16 @@ public class ModListHandler {
                 flatMap(Collection::stream).
                 collect(Collectors.toList());
 
-        List<Pair<Path, String>> localModCoords = modCoordinates.stream().map(mc -> Pair.of(MavenCoordinateResolver.get(mc), mc)).collect(Collectors.toList());
+        List<Pair<Path,String>> localModCoords = modCoordinates.stream().map(mc->Pair.of(MavenCoordinateResolver.get(mc), mc)).collect(Collectors.toList());
         final List<Pair<Path, String>> foundCoordinates = localModCoords.stream().
                 map(mc -> mavenRootPaths.stream().
                         map(root -> Pair.of(root.resolve(mc.getLeft()), mc.getRight())).
                         filter(path -> Files.exists(path.getLeft())).
                         findFirst().
-                        orElseGet(() -> {
+                        orElseGet(()->{
                             LOGGER.warn(CORE, "Failed to find coordinate {}", mc);
                             return null;
-                        })).
+                })).
                 filter(Objects::nonNull).
                 collect(Collectors.toList());
 
@@ -80,7 +79,7 @@ public class ModListHandler {
         }
 
         String extension = FileUtils.fileExtension(filePath);
-        if (Objects.equals("list", extension)) {
+        if (Objects.equals("list",extension)) {
             return readListFile(filePath).stream().filter(s -> !s.isEmpty()).collect(Collectors.toList());
         } else {
             LOGGER.warn(CORE, "Failed to read unknown file list type {} for file {}", extension, filePath);
@@ -90,7 +89,6 @@ public class ModListHandler {
 
     /**
      * Simple list file, ending in ".list" with one mod coordinate per line
-     *
      * @param filePath path
      * @return list
      */

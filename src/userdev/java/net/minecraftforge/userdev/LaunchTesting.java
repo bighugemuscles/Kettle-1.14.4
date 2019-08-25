@@ -25,7 +25,6 @@ import com.mojang.authlib.UserAuthentication;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import cpw.mods.modlauncher.Launcher;
-import org.apache.logging.log4j.LogManager;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -35,10 +34,14 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class LaunchTesting {
-    public static void main(String... args) throws InterruptedException {
+import org.apache.logging.log4j.LogManager;
+
+public class LaunchTesting
+{
+    public static void main(String... args) throws InterruptedException
+    {
         final String markerselection = System.getProperty("forge.logging.markers", "");
-        Arrays.stream(markerselection.split(",")).forEach(marker -> System.setProperty("forge.logging.marker." + marker.toLowerCase(Locale.ROOT), "ACCEPT"));
+        Arrays.stream(markerselection.split(",")).forEach(marker-> System.setProperty("forge.logging.marker."+ marker.toLowerCase(Locale.ROOT), "ACCEPT"));
 
         ArgumentList lst = ArgumentList.from(args);
 
@@ -89,7 +92,7 @@ public class LaunchTesting {
         if (Arrays.asList(
                 "fmldevclient", "fmldevserver", "fmldevdata",
                 "fmluserdevclient", "fmluserdevserver", "fmluserdevdata"
-        ).contains(target)) {
+            ).contains(target)) {
             //nop
         } else {
             throw new IllegalArgumentException("Unknown value for 'target' property: " + target);
@@ -99,11 +102,13 @@ public class LaunchTesting {
         Thread.sleep(10000);// Why do we have this? -Lex 03/06/19
     }
 
-    private static String getRandomNumbers(int length) {   // Generate a time-based random number, to mimic how n.m.client.Main works
+    private static String getRandomNumbers(int length)
+    {   // Generate a time-based random number, to mimic how n.m.client.Main works
         return Long.toString(System.nanoTime() % (int) Math.pow(10, length));
     }
 
-    private static void hackNatives() {
+    private static void hackNatives()
+    {
         String paths = System.getProperty("java.library.path");
         String nativesDir = System.getenv().get("nativesDirectory");
 
@@ -115,12 +120,13 @@ public class LaunchTesting {
         System.setProperty("java.library.path", paths);
 
         // hack the classloader now.
-        try {
+        try
+        {
             final Field sysPathsField = ClassLoader.class.getDeclaredField("sys_paths");
             sysPathsField.setAccessible(true);
             sysPathsField.set(null, null);
-        } catch (Throwable ignored) {
         }
+        catch(Throwable t) {}
     }
 
     /**
@@ -147,9 +153,9 @@ public class LaunchTesting {
             throw new RuntimeException(e); // don't set other variables
         }
 
-        args.put("username", auth.getSelectedProfile().getName());
-        args.put("uuid", auth.getSelectedProfile().getId().toString().replace("-", ""));
-        args.put("accessToken", auth.getAuthenticatedToken());
+        args.put("username",       auth.getSelectedProfile().getName());
+        args.put("uuid",           auth.getSelectedProfile().getId().toString().replace("-", ""));
+        args.put("accessToken",    auth.getAuthenticatedToken());
         args.put("userProperties", auth.getUserProperties().toString());
         return true;
     }

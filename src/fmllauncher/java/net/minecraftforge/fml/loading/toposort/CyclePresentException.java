@@ -45,6 +45,7 @@ public final class CyclePresentException extends IllegalArgumentException {
      * @param <T> the type of node sorted
      * @return the cycles identified
      */
+    @SuppressWarnings("unchecked")
     public <T> Set<Set<T>> getCycles() {
         return (Set<Set<T>>) (Set<?>) cycles;
     }

@@ -19,11 +19,15 @@
 
 package net.minecraftforge.userdev;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.*;
-import java.util.function.Supplier;
 
 /*
  * A class that attempts to parse command line arguments into key value pairs to allow addition and editing.
@@ -49,8 +53,8 @@ class ArgumentList {
                     String key = idx == -1 ? args[x] : args[x].substring(0, idx);
                     String value = idx == -1 ? null : idx == args[x].length() - 1 ? "" : args[x].substring(idx + 1);
 
-                    if (idx == -1 && x + 1 < args.length && !args[x + 1].startsWith("-")) { //Not in --key=value, so try and grab the next argument.
-                        ret.addArg(true, key, args[x + 1]); //Assume that if the next value is a "argument" then don't use it as a value.
+                    if (idx == -1 && x + 1 < args.length && !args[x+1].startsWith("-")) { //Not in --key=value, so try and grab the next argument.
+                        ret.addArg(true, key, args[x+1]); //Assume that if the next value is a "argument" then don't use it as a value.
                         x++; // This isn't perfect, but the best we can do without knowing all of the spec.
                     } else {
                         ret.addArg(false, key, value);
@@ -66,7 +70,7 @@ class ArgumentList {
     }
 
     public void addRaw(final String arg) {
-        entries.add(() -> new String[]{arg});
+        entries.add(() -> new String[] { arg });
     }
 
     public void addArg(boolean split, String raw, String value) {
@@ -84,8 +88,8 @@ class ArgumentList {
 
     public String[] getArguments() {
         return entries.stream()
-                .flatMap(e -> Arrays.asList(e.get()).stream())
-                .toArray(size -> new String[size]);
+            .flatMap(e -> Arrays.asList(e.get()).stream())
+            .toArray(size -> new String[size]);
     }
 
     public boolean hasValue(String key) {
@@ -157,10 +161,10 @@ class ArgumentList {
         @Override
         public String[] get() {
             if (getValue() == null)
-                return new String[]{prefix + getKey()};
+                return new String[] { prefix + getKey() };
             if (split)
-                return new String[]{prefix + getKey(), getValue()};
-            return new String[]{prefix + getKey() + '=' + getValue()};
+                return new String[] { prefix + getKey(), getValue() };
+            return new String[] { prefix + getKey() + '=' + getValue() };
         }
 
         @Override

@@ -21,10 +21,12 @@ package net.minecraftforge.fml.loading.moddiscovery;
 
 import net.minecraftforge.forgespi.language.IModFileInfo;
 
-public class InvalidModFileException extends RuntimeException {
+public class InvalidModFileException extends RuntimeException
+{
     private final IModFileInfo modFileInfo;
 
-    public InvalidModFileException(String message, IModFileInfo modFileInfo) {
+    public InvalidModFileException(String message, IModFileInfo modFileInfo)
+    {
         super(message);
         this.modFileInfo = modFileInfo;
     }

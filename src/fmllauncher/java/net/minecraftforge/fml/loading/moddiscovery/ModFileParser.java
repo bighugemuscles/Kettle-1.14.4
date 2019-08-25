@@ -42,7 +42,7 @@ public class ModFileParser {
     private static final Logger LOGGER = LogManager.getLogger();
 
     public static IModFileInfo readModList(final ModFile modFile) {
-        LOGGER.debug(LOADING, "Parsing mod file candidate {}", modFile.getFilePath());
+        LOGGER.debug(LOADING,"Parsing mod file candidate {}", modFile.getFilePath());
         final Path modsjson = modFile.getLocator().findPath(modFile, "META-INF", "mods.toml");
         if (!Files.exists(modsjson)) {
             LOGGER.warn(LOADING, "Mod file {} is missing mods.toml file", modFile);
@@ -51,7 +51,8 @@ public class ModFileParser {
         return loadModFile(modFile, modsjson);
     }
 
-    public static IModFileInfo loadModFile(final ModFile file, final Path modsjson) {
+    public static IModFileInfo loadModFile(final ModFile file, final Path modsjson)
+    {
         final FileConfig fileConfig = FileConfig.builder(modsjson).build();
         fileConfig.load();
         fileConfig.close();
@@ -59,24 +60,23 @@ public class ModFileParser {
     }
 
     protected static List<CoreModFile> getCoreMods(final ModFile modFile) {
-        Map<String, String> coreModPaths;
+        Map<String,String> coreModPaths;
         try {
             final Path coremodsjson = modFile.getLocator().findPath(modFile, "META-INF", "coremods.json");
             if (!Files.exists(coremodsjson)) {
                 return Collections.emptyList();
             }
-            final Type type = new TypeToken<Map<String, String>>() {
-            }.getType();
+            final Type type = new TypeToken<Map<String, String>>() {}.getType();
             final Gson gson = new Gson();
             coreModPaths = gson.fromJson(Files.newBufferedReader(coremodsjson), type);
         } catch (IOException e) {
-            LOGGER.debug(LOADING, "Failed to read coremod list coremods.json", e);
+            LOGGER.debug(LOADING,"Failed to read coremod list coremods.json", e);
             return Collections.emptyList();
         }
 
         return coreModPaths.entrySet().stream().
-                peek(e -> LOGGER.debug(LOADING, "Found coremod {} with Javascript path {}", e.getKey(), e.getValue())).
-                map(e -> new CoreModFile(e.getKey(), modFile.getLocator().findPath(modFile, e.getValue()), modFile)).
+                peek(e-> LOGGER.debug(LOADING,"Found coremod {} with Javascript path {}", e.getKey(), e.getValue())).
+                map(e -> new CoreModFile(e.getKey(), modFile.getLocator().findPath(modFile, e.getValue()),modFile)).
                 collect(Collectors.toList());
     }
 }

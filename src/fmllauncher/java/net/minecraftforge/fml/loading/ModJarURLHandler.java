@@ -34,9 +34,9 @@ import java.util.jar.Manifest;
 
 import static net.minecraftforge.fml.loading.LogMarkers.CORE;
 
-public class ModJarURLHandler extends URLStreamHandler {
+public class ModJarURLHandler extends URLStreamHandler
+{
     private static final Logger LOGGER = LogManager.getLogger();
-
     // modjar://modid/path/to/file
     @Override
     protected URLConnection openConnection(URL url) {
@@ -54,7 +54,8 @@ public class ModJarURLHandler extends URLStreamHandler {
         }
 
         @Override
-        public void connect() {
+        public void connect()
+        {
             if (resource == null) {
                 modid = url.getHost();
                 // trim first char
@@ -65,7 +66,8 @@ public class ModJarURLHandler extends URLStreamHandler {
         }
 
         @Override
-        public InputStream getInputStream() throws IOException {
+        public InputStream getInputStream() throws IOException
+        {
             connect();
             LOGGER.trace(CORE, "Loading modjar URL {} got resource {} {}", url, resource, resource != null ? Files.exists(resource) : "missing");
             return Files.newInputStream(resource);

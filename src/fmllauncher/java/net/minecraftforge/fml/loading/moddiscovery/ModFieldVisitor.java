@@ -27,18 +27,21 @@ import org.objectweb.asm.Type;
 import java.lang.annotation.ElementType;
 import java.util.LinkedList;
 
-public class ModFieldVisitor extends FieldVisitor {
+public class ModFieldVisitor extends FieldVisitor
+{
     private final LinkedList<ModAnnotation> annotations;
     private final String fieldName;
 
-    public ModFieldVisitor(String name, final LinkedList<ModAnnotation> annotations) {
+    public ModFieldVisitor(String name, final LinkedList<ModAnnotation> annotations)
+    {
         super(Opcodes.ASM5);
         this.fieldName = name;
         this.annotations = annotations;
     }
-
+    
     @Override
-    public AnnotationVisitor visitAnnotation(String annotationName, boolean runtimeVisible) {
+    public AnnotationVisitor visitAnnotation(String annotationName, boolean runtimeVisible)
+    {
         ModAnnotation ann = new ModAnnotation(ElementType.FIELD, Type.getType(annotationName), fieldName);
         annotations.addFirst(ann);
         return new ModAnnotationVisitor(annotations, ann);

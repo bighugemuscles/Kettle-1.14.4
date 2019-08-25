@@ -47,23 +47,23 @@ import static net.minecraftforge.fml.loading.LogMarkers.CORE;
 /**
  * This class fixes older Java SSL setups which don't contain the correct root certificates to trust Let's Encrypt
  * https endpoints.
- * <p>
+ *
  * It uses a secondary JKS keystore: lekeystore.jks, which contains the two root certificate keys as documented here:
  * <a href="https://letsencrypt.org/certificates/">https://letsencrypt.org/certificates/</a>
- * <p>
+ *
  * To create the keystore, the following commands were run:
  * <pre>
  *     keytool -import -alias letsencryptisrgx1 -file isrgrootx1.pem -keystore lekeystore.jks -storetype jks -storepass supersecretpassword -v
  *     keytool -import -alias identrustx3 -file identrustx3.pem -keystore lekeystore.jks -storetype jks -storepass supersecretpassword -v
  * </pre>
- * <p>
+ *
  * The PEM files were obtained from the above URL.
  */
 class FixSSL {
     static void fixup() {
         try {
             final KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            Path ksPath = Paths.get(System.getProperty("java.home"), "lib", "security", "cacerts");
+            Path ksPath = Paths.get(System.getProperty("java.home"),"lib", "security", "cacerts");
             keyStore.load(Files.newInputStream(ksPath), "changeit".toCharArray());
             final Map<String, Certificate> jdkTrustStore = Collections.list(keyStore.aliases()).stream().collect(Collectors.toMap(a -> a, rethrowFunction(keyStore::getCertificate)));
 
@@ -84,7 +84,7 @@ class FixSSL {
             HttpsURLConnection.setDefaultSSLSocketFactory(tls.getSocketFactory());
             LogManager.getLogger().info(CORE, "Added Lets Encrypt root certificates as additional trust");
         } catch (KeyStoreException | IOException | NoSuchAlgorithmException | CertificateException | KeyManagementException e) {
-            LogManager.getLogger().fatal(CORE, "Failed to load lets encrypt certificate. Expect problems", e);
+            LogManager.getLogger().fatal(CORE,"Failed to load lets encrypt certificate. Expect problems", e);
         }
 
     }

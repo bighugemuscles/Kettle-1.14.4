@@ -46,7 +46,7 @@ public class ModDirTransformerDiscoverer implements ITransformerDiscoveryService
             Files.walk(modsDir, 1).forEach(p -> {
                 if (!Files.isRegularFile(p)) return;
                 if (!p.toString().endsWith(".jar")) return;
-                if (LamdbaExceptionUtils.uncheck(() -> Files.size(p)) == 0) return;
+                if (LamdbaExceptionUtils.uncheck(()->Files.size(p)) == 0) return;
                 try (ZipFile zf = new ZipFile(new File(p.toUri()))) {
                     if (zf.getEntry("META-INF/services/cpw.mods.modlauncher.api.ITransformationService") != null) {
                         paths.add(p);

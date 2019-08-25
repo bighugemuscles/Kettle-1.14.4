@@ -22,34 +22,38 @@ package net.minecraftforge.fml.loading;
 import com.electronwill.nightconfig.core.ConfigSpec;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.electronwill.nightconfig.core.io.WritingMode;
+import net.minecraftforge.api.distmarker.Dist;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import static net.minecraftforge.fml.loading.LogMarkers.CORE;
 
-public class FMLConfig {
+public class FMLConfig
+{
     private static final Logger LOGGER = LogManager.getLogger();
     private static FMLConfig INSTANCE = new FMLConfig();
     private static ConfigSpec configSpec = new ConfigSpec();
-
     static {
         configSpec.define("splashscreen", Boolean.TRUE);
         configSpec.define("maxThreads", -1);
         configSpec.define("versionCheck", Boolean.TRUE);
-        configSpec.define("defaultConfigPath", "defaultconfigs");
+        configSpec.define("defaultConfigPath",  "defaultconfigs");
     }
 
     private CommentedFileConfig configData;
 
-    private void loadFrom(final Path configFile) {
-        configData = CommentedFileConfig.builder(configFile).sync()
-                .defaultResource("/META-INF/defaultfmlconfig.toml")
-                .autosave().autoreload()
-                .writingMode(WritingMode.REPLACE)
-                .build();
+    private void loadFrom(final Path configFile)
+    {
+        configData = CommentedFileConfig.builder(configFile).sync().
+                defaultResource("/META-INF/defaultfmlconfig.toml").
+                autosave().autoreload().
+                writingMode(WritingMode.REPLACE).
+                build();
         configData.load();
         if (!configSpec.isCorrect(configData)) {
             LOGGER.warn(CORE, "Configuration file {} is not correct. Correcting", configFile);
@@ -59,7 +63,8 @@ public class FMLConfig {
         configData.save();
     }
 
-    public static void load() {
+    public static void load()
+    {
         final Path configFile = FMLPaths.FMLCONFIG.get();
         INSTANCE.loadFrom(configFile);
         LOGGER.trace(CORE, "Loaded FML config from {}", FMLPaths.FMLCONFIG.get());

@@ -35,7 +35,9 @@ import java.util.function.BiFunction;
 
 import static net.minecraftforge.fml.loading.LogMarkers.CORE;
 
-public class FMLServiceProvider implements ITransformationService {
+public class FMLServiceProvider implements ITransformationService
+{
+
     private static final Logger LOGGER = LogManager.getLogger();
     private ArgumentAcceptingOptionSpec<String> modsOption;
     private ArgumentAcceptingOptionSpec<String> modListsOption;
@@ -55,9 +57,9 @@ public class FMLServiceProvider implements ITransformationService {
     private String targetForgeGroup;
     private Map<String, Object> arguments;
 
-    @Nonnull
     @Override
-    public String name() {
+    public String name()
+    {
         return "fml";
     }
 
@@ -84,12 +86,13 @@ public class FMLServiceProvider implements ITransformationService {
 
     @Override
     public void beginScanning(final IEnvironment environment) {
-        LOGGER.debug(CORE, "Initiating mod scan");
+        LOGGER.debug(CORE,"Initiating mod scan");
         FMLLoader.beginModScan(arguments);
     }
 
     @Override
-    public void onLoad(IEnvironment environment, Set<String> otherServices) throws IncompatibleEnvironmentException {
+    public void onLoad(IEnvironment environment, Set<String> otherServices) throws IncompatibleEnvironmentException
+    {
         LOGGER.debug("Injecting tracing printstreams for STDOUT/STDERR.");
         System.setOut(new TracingPrintStream(LogManager.getLogger("STDOUT"), System.out));
         System.setErr(new TracingPrintStream(LogManager.getLogger("STDERR"), System.err));
@@ -97,7 +100,8 @@ public class FMLServiceProvider implements ITransformationService {
     }
 
     @Override
-    public void arguments(BiFunction<String, String, OptionSpecBuilder> argumentBuilder) {
+    public void arguments(BiFunction<String, String, OptionSpecBuilder> argumentBuilder)
+    {
         forgeOption = argumentBuilder.apply("forgeVersion", "Forge Version number").withRequiredArg().ofType(String.class).required();
         forgeGroupOption = argumentBuilder.apply("forgeGroup", "Forge Group (for testing)").withRequiredArg().ofType(String.class).defaultsTo("net.minecraftforge");
         mcOption = argumentBuilder.apply("mcVersion", "Minecraft Version number").withRequiredArg().ofType(String.class).required();
@@ -109,7 +113,8 @@ public class FMLServiceProvider implements ITransformationService {
     }
 
     @Override
-    public void argumentValues(OptionResult option) {
+    public void argumentValues(OptionResult option)
+    {
         modsArgumentList = option.values(modsOption);
         modListsArgumentList = option.values(modListsOption);
         mavenRootsArgumentList = option.values(mavenRootsOption);
@@ -122,7 +127,8 @@ public class FMLServiceProvider implements ITransformationService {
 
     @Nonnull
     @Override
-    public List<ITransformer> transformers() {
+    public List<ITransformer> transformers()
+    {
         LOGGER.debug(CORE, "Loading coremod transformers");
         return new ArrayList<>(FMLLoader.getCoreModProvider().getCoreModTransformers());
     }

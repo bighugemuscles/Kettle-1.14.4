@@ -25,9 +25,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Stream;
 
-public class StringUtils {
+public class StringUtils
+{
     public static String toLowerCase(final String str) {
         return str.toLowerCase(Locale.ROOT);
     }
@@ -38,13 +38,16 @@ public class StringUtils {
 
     public static boolean endsWith(final String search, final String... endings) {
         String lowerSearch = toLowerCase(search);
-        return Stream.of(endings).anyMatch(lowerSearch::endsWith);
+        return java.util.stream.Stream.of(endings).anyMatch(lowerSearch::endsWith);
     }
 
     public static URL toURL(final String string) {
-        try {
+        try
+        {
             return new URL(string);
-        } catch (MalformedURLException e) {
+        }
+        catch (MalformedURLException e)
+        {
             throw new RuntimeException(e);
         }
     }

@@ -24,9 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.jar.Manifest;
@@ -37,8 +35,8 @@ import static net.minecraftforge.fml.loading.LogMarkers.SCAN;
 
 public class ExplodedDirectoryLocator implements IModLocator {
     private static final Logger LOGGER = LogManager.getLogger();
-    private final List<Pair<Path, List<Path>>> rootDirs;
-    private final Map<ModFile, Pair<Path, List<Path>>> mods;
+    private final List<Pair<Path,List<Path>>> rootDirs;
+    private final Map<ModFile, Pair<Path,List<Path>>> mods;
 
     public ExplodedDirectoryLocator() {
         this.rootDirs = new ArrayList<>();
@@ -78,17 +76,17 @@ public class ExplodedDirectoryLocator implements IModLocator {
         Path found = mods.get(modFile).getLeft().resolve(target);
         if (Files.exists(found)) return found;
         // then try left path (classes)
-        return mods.get(modFile).getRight().stream().map(p -> p.resolve(target)).filter(Files::exists).
+        return mods.get(modFile).getRight().stream().map(p->p.resolve(target)).filter(Files::exists).
                 findFirst().orElse(found.resolve(target));
     }
 
     @Override
     public void scanFile(final ModFile modFile, final Consumer<Path> pathConsumer) {
-        LOGGER.debug(SCAN, "Scanning exploded directory {}", modFile.getFilePath().toString());
+        LOGGER.debug(SCAN,"Scanning exploded directory {}", modFile.getFilePath().toString());
         final Pair<Path, List<Path>> pathPathPair = mods.get(modFile);
         // classes are in the right branch of the pair
-        pathPathPair.getRight().forEach(path -> scanIndividualPath(path, pathConsumer));
-        LOGGER.debug(SCAN, "Exploded directory scan complete {}", pathPathPair.getLeft().toString());
+         pathPathPair.getRight().forEach(path->scanIndividualPath(path, pathConsumer));
+        LOGGER.debug(SCAN,"Exploded directory scan complete {}", pathPathPair.getLeft().toString());
     }
 
     private void scanIndividualPath(final Path path, Consumer<Path> pathConsumer) {
@@ -96,20 +94,22 @@ public class ExplodedDirectoryLocator implements IModLocator {
         try (Stream<Path> files = Files.find(path, Integer.MAX_VALUE, (p, a) -> p.getNameCount() > 0 && p.getFileName().toString().endsWith(".class"))) {
             files.forEach(pathConsumer);
         } catch (IOException e) {
-            LOGGER.error(SCAN, "Exception scanning {}", path, e);
+            LOGGER.error(SCAN,"Exception scanning {}", path, e);
         }
     }
-
     @Override
-    public String toString() {
+    public String toString()
+    {
         return "{ExplodedDir locator}";
     }
 
     @Override
-    public Optional<Manifest> findManifest(Path file) {
+    public Optional<Manifest> findManifest(Path file)
+    {
         return Optional.empty();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void initArguments(final Map<String, ?> arguments) {
         final List<Pair<Path, List<Path>>> explodedTargets = ((Map<String, List<Pair<Path, List<Path>>>>) arguments).get("explodedTargets");

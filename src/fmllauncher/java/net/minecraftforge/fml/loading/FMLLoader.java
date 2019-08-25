@@ -22,7 +22,12 @@ package net.minecraftforge.fml.loading;
 import cpw.mods.modlauncher.Launcher;
 import cpw.mods.modlauncher.ServiceLoaderStreamUtils;
 import cpw.mods.modlauncher.TransformingClassLoader;
-import cpw.mods.modlauncher.api.*;
+import cpw.mods.modlauncher.api.IEnvironment;
+import cpw.mods.modlauncher.api.ILaunchHandlerService;
+import cpw.mods.modlauncher.api.INameMappingService;
+import cpw.mods.modlauncher.api.ITransformationService;
+import cpw.mods.modlauncher.api.ITransformingClassLoader;
+import cpw.mods.modlauncher.api.IncompatibleEnvironmentException;
 import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
 import net.minecraftforge.accesstransformer.service.AccessTransformerService;
 import net.minecraftforge.api.distmarker.Dist;
@@ -38,7 +43,12 @@ import org.apache.logging.log4j.Logger;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -46,7 +56,8 @@ import java.util.stream.Collectors;
 import static net.minecraftforge.fml.loading.LogMarkers.CORE;
 import static net.minecraftforge.fml.loading.LogMarkers.SCAN;
 
-public class FMLLoader {
+public class FMLLoader
+{
     private static final Logger LOGGER = LogManager.getLogger();
     private static AccessTransformerService accessTransformer;
     private static ModDiscoverer modDiscoverer;
@@ -68,44 +79,45 @@ public class FMLLoader {
     private static Predicate<String> classLoaderExclusions;
     private static String launchHandlerName;
 
-    static void onInitialLoad(IEnvironment environment, Set<String> otherServices) throws IncompatibleEnvironmentException {
+    static void onInitialLoad(IEnvironment environment, Set<String> otherServices) throws IncompatibleEnvironmentException
+    {
         final String version = LauncherVersion.getVersion();
-        LOGGER.debug(CORE, "FML {} loading", version);
+        LOGGER.debug(CORE,"FML {} loading", version);
         final Package modLauncherPackage = ITransformationService.class.getPackage();
-        LOGGER.debug(CORE, "FML found ModLauncher version : {}", modLauncherPackage.getImplementationVersion());
+        LOGGER.debug(CORE,"FML found ModLauncher version : {}", modLauncherPackage.getImplementationVersion());
         if (!modLauncherPackage.isCompatibleWith("2.0")) {
-            LOGGER.fatal(CORE, "Found incompatible ModLauncher specification : {}, version {} from {}", modLauncherPackage.getSpecificationVersion(), modLauncherPackage.getImplementationVersion(), modLauncherPackage.getImplementationVendor());
-            throw new IncompatibleEnvironmentException("Incompatible modlauncher found " + modLauncherPackage.getSpecificationVersion());
+            LOGGER.fatal(CORE,"Found incompatible ModLauncher specification : {}, version {} from {}", modLauncherPackage.getSpecificationVersion(), modLauncherPackage.getImplementationVersion(), modLauncherPackage.getImplementationVendor());
+            throw new IncompatibleEnvironmentException("Incompatible modlauncher found "+modLauncherPackage.getSpecificationVersion());
         }
         LOGGER.debug(CORE, "Initializing modjar URL handler");
-        URL.setURLStreamHandlerFactory(p -> p.equals("modjar") ? new ModJarURLHandler() : null);
+        URL.setURLStreamHandlerFactory(p->p.equals("modjar") ? new ModJarURLHandler() : null);
 
-        accessTransformer = (AccessTransformerService) environment.findLaunchPlugin("accesstransformer").orElseThrow(() -> {
-            LOGGER.fatal(CORE, "Access Transformer library is missing, we need this to run");
+        accessTransformer = (AccessTransformerService) environment.findLaunchPlugin("accesstransformer").orElseThrow(()-> {
+            LOGGER.fatal(CORE,"Access Transformer library is missing, we need this to run");
             return new IncompatibleEnvironmentException("Missing AccessTransformer, cannot run");
         });
 
         final Package atPackage = accessTransformer.getClass().getPackage();
-        LOGGER.debug(CORE, "FML found AccessTransformer version : {}", atPackage.getImplementationVersion());
+        LOGGER.debug(CORE,"FML found AccessTransformer version : {}", atPackage.getImplementationVersion());
         if (!atPackage.isCompatibleWith("1.0")) {
-            LOGGER.fatal(CORE, "Found incompatible AccessTransformer specification : {}, version {} from {}", atPackage.getSpecificationVersion(), atPackage.getImplementationVersion(), atPackage.getImplementationVendor());
-            throw new IncompatibleEnvironmentException("Incompatible accesstransformer found " + atPackage.getSpecificationVersion());
+            LOGGER.fatal(CORE,"Found incompatible AccessTransformer specification : {}, version {} from {}", atPackage.getSpecificationVersion(), atPackage.getImplementationVersion(), atPackage.getImplementationVendor());
+            throw new IncompatibleEnvironmentException("Incompatible accesstransformer found "+atPackage.getSpecificationVersion());
         }
 
-        eventBus = environment.findLaunchPlugin("eventbus").orElseThrow(() -> {
-            LOGGER.fatal(CORE, "Event Bus library is missing, we need this to run");
+        eventBus = environment.findLaunchPlugin("eventbus").orElseThrow(()-> {
+            LOGGER.fatal(CORE,"Event Bus library is missing, we need this to run");
             return new IncompatibleEnvironmentException("Missing EventBus, cannot run");
         });
 
         final Package eventBusPackage = eventBus.getClass().getPackage();
-        LOGGER.debug(CORE, "FML found EventBus version : {}", eventBusPackage.getImplementationVersion());
+        LOGGER.debug(CORE,"FML found EventBus version : {}", eventBusPackage.getImplementationVersion());
         if (!eventBusPackage.isCompatibleWith("1.0")) {
-            LOGGER.fatal(CORE, "Found incompatible EventBus specification : {}, version {} from {}", eventBusPackage.getSpecificationVersion(), eventBusPackage.getImplementationVersion(), eventBusPackage.getImplementationVendor());
-            throw new IncompatibleEnvironmentException("Incompatible eventbus found " + eventBusPackage.getSpecificationVersion());
+            LOGGER.fatal(CORE,"Found incompatible EventBus specification : {}, version {} from {}", eventBusPackage.getSpecificationVersion(), eventBusPackage.getImplementationVersion(), eventBusPackage.getImplementationVendor());
+            throw new IncompatibleEnvironmentException("Incompatible eventbus found "+eventBusPackage.getSpecificationVersion());
         }
 
-        runtimeDistCleaner = (RuntimeDistCleaner) environment.findLaunchPlugin("runtimedistcleaner").orElseThrow(() -> {
-            LOGGER.fatal(CORE, "Dist Cleaner is missing, we need this to run");
+        runtimeDistCleaner = (RuntimeDistCleaner)environment.findLaunchPlugin("runtimedistcleaner").orElseThrow(()-> {
+            LOGGER.fatal(CORE,"Dist Cleaner is missing, we need this to run");
             return new IncompatibleEnvironmentException("Missing DistCleaner, cannot run!");
         });
         LOGGER.debug(CORE, "Found Runtime Dist Cleaner");
@@ -123,7 +135,7 @@ public class FMLLoader {
 
         coreModProvider = coreModProviders.get(0);
         final Package coremodPackage = coreModProvider.getClass().getPackage();
-        LOGGER.debug(CORE, "FML found CoreMod version : {}", coremodPackage.getImplementationVersion());
+        LOGGER.debug(CORE,"FML found CoreMod version : {}", coremodPackage.getImplementationVersion());
 
 
         LOGGER.debug(CORE, "Found ForgeSPI package implementation version {}", Environment.class.getPackage().getImplementationVersion());
@@ -143,12 +155,13 @@ public class FMLLoader {
         FixSSL.fixup();
     }
 
-    static void setupLaunchHandler(final IEnvironment environment, final Map<String, ?> arguments) {
+    static void setupLaunchHandler(final IEnvironment environment, final Map<String, ?> arguments)
+    {
         final String launchTarget = environment.getProperty(IEnvironment.Keys.LAUNCHTARGET.get()).orElse("MISSING");
         final Optional<ILaunchHandlerService> launchHandler = environment.findLaunchHandler(launchTarget);
         LOGGER.debug(CORE, "Using {} as launch service", launchTarget);
         if (!launchHandler.isPresent()) {
-            LOGGER.fatal(CORE, "Missing LaunchHandler {}, cannot continue", launchTarget);
+            LOGGER.fatal(CORE,"Missing LaunchHandler {}, cannot continue", launchTarget);
             throw new RuntimeException("Missing launch handler");
         }
 
@@ -159,7 +172,7 @@ public class FMLLoader {
         launchHandlerName = launchHandler.get().name();
         gamePath = environment.getProperty(IEnvironment.Keys.GAMEDIR.get()).orElse(Paths.get(".").toAbsolutePath());
 
-        FMLCommonLaunchHandler commonLaunchHandler = (FMLCommonLaunchHandler) launchHandler.get();
+        FMLCommonLaunchHandler commonLaunchHandler = (FMLCommonLaunchHandler)launchHandler.get();
         naming = commonLaunchHandler.getNaming();
         dist = commonLaunchHandler.getDist();
         accessTransformer.getExtension().accept(Pair.of(naming, "srg"));
@@ -169,7 +182,7 @@ public class FMLLoader {
         forgeVersion = (String) arguments.get("forgeVersion");
         forgeGroup = (String) arguments.get("forgeGroup");
 
-        LOGGER.debug(CORE, "Received command line version data  : MC Version: '{}' MCP Version: '{}' Forge Version: '{}' Forge group: '{}'", mcVersion, mcpVersion, forgeVersion, forgeGroup);
+        LOGGER.debug(CORE,"Received command line version data  : MC Version: '{}' MCP Version: '{}' Forge Version: '{}' Forge group: '{}'", mcVersion, mcpVersion, forgeVersion, forgeGroup);
         forgePath = commonLaunchHandler.getForgePath(mcVersion, forgeVersion, forgeGroup);
         mcPaths = commonLaunchHandler.getMCPaths(mcVersion, mcpVersion, forgeVersion, forgeGroup);
 
@@ -182,9 +195,9 @@ public class FMLLoader {
 
         runtimeDistCleaner.getExtension().accept(dist);
     }
-
-    public static void beginModScan(final Map<String, ?> arguments) {
-        LOGGER.debug(SCAN, "Scanning for Mod Locators");
+    public static void beginModScan(final Map<String,?> arguments)
+    {
+        LOGGER.debug(SCAN,"Scanning for Mod Locators");
         modDiscoverer = new ModDiscoverer(arguments);
         final BackgroundScanHandler backgroundScanHandler = modDiscoverer.discoverMods();
         loadingModList = backgroundScanHandler.getLoadingModList();
@@ -194,7 +207,8 @@ public class FMLLoader {
         return coreModProvider;
     }
 
-    public static LanguageLoadingProvider getLanguageLoadingProvider() {
+    public static LanguageLoadingProvider getLanguageLoadingProvider()
+    {
         return languageLoadingProvider;
     }
 
@@ -202,30 +216,36 @@ public class FMLLoader {
         return modDiscoverer;
     }
 
-    public static void addAccessTransformer(Path atPath, ModFile modName) {
+    public static void addAccessTransformer(Path atPath, ModFile modName)
+    {
         LOGGER.debug(SCAN, "Adding Access Transformer in {}", modName.getFilePath());
         accessTransformer.addResource(atPath, modName.getFileName());
     }
 
-    public static Dist getDist() {
+    public static Dist getDist()
+    {
         return dist;
     }
 
-    public static void beforeStart(ITransformingClassLoader launchClassLoader) {
+    public static void beforeStart(ITransformingClassLoader launchClassLoader)
+    {
         FMLLoader.launchClassLoader = (TransformingClassLoader) launchClassLoader.getInstance();
     }
 
 
-    public static LoadingModList getLoadingModList() {
+    public static LoadingModList getLoadingModList()
+    {
         return loadingModList;
 
     }
 
-    public static TransformingClassLoader getLaunchClassLoader() {
+    public static TransformingClassLoader getLaunchClassLoader()
+    {
         return launchClassLoader;
     }
 
-    public static Path getGamePath() {
+    public static Path getGamePath()
+    {
         return gamePath;
     }
 

@@ -19,11 +19,7 @@
 
 package net.minecraftforge.userdev;
 
-import net.minecraftforge.fml.loading.LibraryFinder;
-import net.minecraftforge.fml.loading.moddiscovery.AbstractJarFileLocator;
-import net.minecraftforge.fml.loading.moddiscovery.ModFile;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import static net.minecraftforge.fml.loading.LogMarkers.CORE;
 
 import java.io.IOException;
 import java.net.URL;
@@ -35,7 +31,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static net.minecraftforge.fml.loading.LogMarkers.CORE;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import net.minecraftforge.fml.loading.LibraryFinder;
+import net.minecraftforge.fml.loading.moddiscovery.AbstractJarFileLocator;
+import net.minecraftforge.fml.loading.moddiscovery.ModFile;
 
 public class ClasspathLocator extends AbstractJarFileLocator {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -45,9 +46,9 @@ public class ClasspathLocator extends AbstractJarFileLocator {
     @Override
     public List<ModFile> scanMods() {
         return modCoords.stream().
-                map(mc -> new ModFile(mc, this)).
-                peek(f -> modJars.compute(f, (mf, fs) -> createFileSystem(mf))).
-                collect(Collectors.toList());
+            map(mc -> new ModFile(mc, this)).
+            peek(f->modJars.compute(f, (mf, fs)->createFileSystem(mf))).
+            collect(Collectors.toList());
     }
 
     @Override
@@ -70,7 +71,7 @@ public class ClasspathLocator extends AbstractJarFileLocator {
                 this.modCoords.add(path);
             }
         } catch (IOException e) {
-            LOGGER.fatal(CORE, "Error trying to find resources", e);
+            LOGGER.fatal(CORE,"Error trying to find resources", e);
             throw new RuntimeException("wha?", e);
         }
     }

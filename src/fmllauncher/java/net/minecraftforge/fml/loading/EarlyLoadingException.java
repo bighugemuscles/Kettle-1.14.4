@@ -27,9 +27,10 @@ import java.util.List;
  */
 public class EarlyLoadingException extends RuntimeException {
     public static class ExceptionData {
+
+
         private final String i18message;
         private final Object[] args;
-
         public ExceptionData(final String message, Object... args) {
             this.i18message = message;
             this.args = args;
@@ -43,7 +44,6 @@ public class EarlyLoadingException extends RuntimeException {
             return args;
         }
     }
-
     private final List<ExceptionData> errorMessages;
 
     public List<ExceptionData> getAllData() {

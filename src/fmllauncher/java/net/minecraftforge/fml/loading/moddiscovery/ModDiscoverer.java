@@ -29,8 +29,22 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.*;
-import java.util.*;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.ServiceLoader;
 import java.util.function.Consumer;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
@@ -49,9 +63,9 @@ public class ModDiscoverer {
     public ModDiscoverer(Map<String, ?> arguments) {
         locators = ServiceLoader.load(IModLocator.class);
         locatorList = ServiceLoaderStreamUtils.toList(this.locators);
-        locatorList.forEach(l -> l.initArguments(arguments));
+        locatorList.forEach(l->l.initArguments(arguments));
         locatorList.add(new MinecraftLocator());
-        LOGGER.debug(CORE, "Found Mod Locators : {}", () -> locatorList.stream().map(iModLocator -> "(" + iModLocator.name() + ":" + iModLocator.getClass().getPackage().getImplementationVersion() + ")").collect(Collectors.joining(",")));
+        LOGGER.debug(CORE,"Found Mod Locators : {}", ()->locatorList.stream().map(iModLocator -> "("+iModLocator.name() + ":" + iModLocator.getClass().getPackage().getImplementationVersion()+")").collect(Collectors.joining(",")));
     }
 
     ModDiscoverer(List<IModLocator> locatorList) {
@@ -60,19 +74,20 @@ public class ModDiscoverer {
     }
 
     public BackgroundScanHandler discoverMods() {
-        LOGGER.debug(SCAN, "Scanning for mods and other resources to load. We know {} ways to find mods", locatorList.size());
+        LOGGER.debug(SCAN,"Scanning for mods and other resources to load. We know {} ways to find mods", locatorList.size());
         final Map<ModFile.Type, List<ModFile>> modFiles = locatorList.stream()
-                .peek(loc -> LOGGER.debug(SCAN, "Trying locator {}", loc))
+                .peek(loc -> LOGGER.debug(SCAN,"Trying locator {}", loc))
                 .map(IModLocator::scanMods)
                 .flatMap(Collection::stream)
-                .peek(mf -> LOGGER.debug(SCAN, "Found mod file {} of type {} with locator {}", mf.getFileName(), mf.getType(), mf.getLocator()))
+                .peek(mf -> LOGGER.debug(SCAN,"Found mod file {} of type {} with locator {}", mf.getFileName(), mf.getType(), mf.getLocator()))
                 .collect(Collectors.groupingBy(ModFile::getType));
 
         FMLLoader.getLanguageLoadingProvider().addAdditionalLanguages(modFiles.get(ModFile.Type.LANGPROVIDER));
         BackgroundScanHandler backgroundScanHandler = new BackgroundScanHandler();
         final List<ModFile> mods = modFiles.getOrDefault(ModFile.Type.MOD, Collections.emptyList());
         final List<ModFile> brokenFiles = new ArrayList<>();
-        for (Iterator<ModFile> iterator = mods.iterator(); iterator.hasNext(); ) {
+        for (Iterator<ModFile> iterator = mods.iterator(); iterator.hasNext(); )
+        {
             ModFile mod = iterator.next();
             if (!mod.getLocator().isValid(mod) || !mod.identifyMods()) {
                 LOGGER.warn(SCAN, "File {} has been ignored - it is invalid", mod.getFilePath());
@@ -80,7 +95,7 @@ public class ModDiscoverer {
                 brokenFiles.add(mod);
             }
         }
-        LOGGER.debug(SCAN, "Found {} mod files with {} mods", mods::size, () -> mods.stream().mapToInt(mf -> mf.getModInfos().size()).sum());
+        LOGGER.debug(SCAN,"Found {} mod files with {} mods", mods::size, ()->mods.stream().mapToInt(mf -> mf.getModInfos().size()).sum());
         final LoadingModList loadingModList = ModSorter.sort(mods);
         loadingModList.addCoreMods();
         loadingModList.addAccessTransformers();
@@ -98,7 +113,7 @@ public class ModDiscoverer {
                 try {
                     fileSystem = FileSystems.newFileSystem(mcJar, getClass().getClassLoader());
                 } catch (ZipError | IOException e) {
-                    LOGGER.fatal(SCAN, "Invalid Minecraft JAR file - no filesystem created");
+                    LOGGER.fatal(SCAN,"Invalid Minecraft JAR file - no filesystem created");
                     throw new RuntimeException(e);
                 }
             } else {
@@ -149,10 +164,9 @@ public class ModDiscoverer {
         private Path findPathJar(final ModFile modFile, final String... path) {
             return fileSystem.getPath(path[0], Arrays.copyOfRange(path, 1, path.length));
         }
-
         @Override
         public void scanFile(final ModFile modFile, final Consumer<Path> pathConsumer) {
-            LOGGER.debug(SCAN, "Scan started: {}", modFile);
+            LOGGER.debug(SCAN,"Scan started: {}", modFile);
             Path path;
             if (Files.isDirectory(mcJar))
                 path = mcJar;
@@ -163,7 +177,7 @@ public class ModDiscoverer {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            LOGGER.debug(SCAN, "Scan finished: {}", modFile);
+            LOGGER.debug(SCAN,"Scan finished: {}", modFile);
         }
 
         @Override
